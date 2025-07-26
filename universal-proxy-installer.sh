@@ -85,7 +85,7 @@ if [ -z "$PROXY_DOMAIN" ]; then
     echo
     read -p "Введите домен прокси (например, proxy.example.com): " PROXY_DOMAIN
     read -p "Введите целевой домен (например, old.example.com): " TARGET_DOMAIN
-    read -p "Введите домен прокси (например, proxy.example.com): " SERVER_DOMAIN
+    read -p "Введите домен SSL (например, proxy.example.com): " SERVER_DOMAIN
     read -p "Введите email для SSL сертификата: " SSL_EMAIL
     read -p "Введите имя проекта (например, my-proxy): " PROJECT_NAME
     
