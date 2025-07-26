@@ -12,7 +12,7 @@
 #   2. Автоматический режим (через переменные окружения):
 #      export PROXY_DOMAIN="proxy.example.com"
 #      export TARGET_DOMAIN="old.example.com"
-#      export SERVER_DOMAIN="proxy.example.com"
+#      export SERVER_DOMAIN="node1.proxy.example.com"
 #      export SSL_EMAIL="admin@example.com"
 #      export PROJECT_NAME="my-proxy"
 #      sudo ./universal-proxy-installer.sh
@@ -85,7 +85,7 @@ if [ -z "$PROXY_DOMAIN" ]; then
     echo
     read -p "Введите домен прокси (например, proxy.example.com): " PROXY_DOMAIN
     read -p "Введите целевой домен (например, old.example.com): " TARGET_DOMAIN
-    read -p "Введите домен SSL (например, proxy.example.com): " SERVER_DOMAIN
+    read -p "Введите домен SSL (например, node1.proxy.example.com): " SERVER_DOMAIN
     read -p "Введите email для SSL сертификата: " SSL_EMAIL
     read -p "Введите имя проекта (например, my-proxy): " PROJECT_NAME
     
@@ -113,7 +113,7 @@ if [ -z "$PROXY_DOMAIN" ] || [ -z "$TARGET_DOMAIN" ] || [ -z "$SERVER_DOMAIN" ] 
     echo "Пример использования через переменные окружения:"
     echo "export PROXY_DOMAIN=\"proxy.example.com\""
     echo "export TARGET_DOMAIN=\"old.example.com\""
-    echo "export SERVER_DOMAIN=\"proxy.example.com\""
+    echo "export SERVER_DOMAIN=\"node1.proxy.example.com\""
     echo "export SSL_EMAIL=\"admin@example.com\""
     echo "export PROJECT_NAME=\"my-proxy\""
     echo "sudo $0"
