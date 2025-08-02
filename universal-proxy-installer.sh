@@ -940,7 +940,7 @@ echo "   • Оптимизированная nginx конфигурация"
 echo
 echo -e "${GREEN}✅ Все сервисы запущены и готовы к работе!${NC}"
 echo
-echo -e "${CYAN}Для тестирования откройте в браузере: https://$SERVER_DOMAIN${NC} и https://$PROXY_DOMAIN${NC}"
+echo -e "${CYAN}Для тестирования откройте в браузере: https://$SERVER_DOMAIN$ и https://$PROXY_DOMAIN${NC}"
 echo
 
 log_success "Minimal Universal Reverse Proxy успешно установлен и настроен!" 
