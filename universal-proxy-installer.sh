@@ -2,7 +2,7 @@
 
 # Universal Reverse Proxy Installer - МИНИМАЛЬНАЯ СТАБИЛЬНАЯ ВЕРСИЯ
 # Автоматическое развертывание Node.js reverse proxy с HTTPS
-# Версия: 1.4
+# Версия: 1.5
 # Автор: Savvvit
 #
 # Использование:
@@ -85,7 +85,7 @@ if [ -z "$PROXY_DOMAIN" ]; then
     echo
     read -p "Введите домен прокси (например, proxy.example.com): " PROXY_DOMAIN
     read -p "Введите целевой домен (например, old.example.com): " TARGET_DOMAIN
-    read -p "Введите домен SSL (например, node1.proxy.example.com): " SERVER_DOMAIN
+    read -p "Введите сервер SSL (например, node1.proxy.example.com): " SERVER_DOMAIN
     read -p "Введите email для SSL сертификата: " SSL_EMAIL
     read -p "Введите имя проекта (например, my-proxy): " PROJECT_NAME
     
@@ -443,6 +443,8 @@ server {
     client_header_timeout 30s;
     
     # SSL Configuration
+    #ssl_certificate /etc/letsencrypt/live/SERVER_DOMAIN_PLACEHOLDER/fullchain.pem;
+    #ssl_certificate_key /etc/letsencrypt/live/SERVER_DOMAIN_PLACEHOLDER/privkey.pem;
     ssl_certificate /etc/letsencrypt/live/SERVER_DOMAIN_PLACEHOLDER/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/SERVER_DOMAIN_PLACEHOLDER/privkey.pem;
     
@@ -525,14 +527,27 @@ server {
         add_header Content-Type text/plain;
     }
     
-    # Block common attack patterns
-    location ~* \.(git|svn|env|log|bak)$ {
+    # Block common attack patterns + .action by Savvvit
+    location ~* \.(git|svn|env|log|bak|action)$ {
         deny all;
         return 404;
     }
     
     # Block PHP files
     location ~* \.php$ {
+        deny all;
+        return 404;
+    }
+
+    # By Savvvit
+    # robots.txt
+    location /robots.txt {
+        return 200 "User-agent: *\nDisallow: /\n";
+        add_header Content-Type text/plain;
+    }
+
+    # Block /cgi-bin/
+    location /cgi-bin {
         deny all;
         return 404;
     }
@@ -718,7 +733,7 @@ cat > $PROJECT_DIR/README.md << EOF
 
 - **Домен прокси**: $PROXY_DOMAIN
 - **Целевой домен**: $TARGET_DOMAIN
-- **Сервер прокси**: $SERVER_DOMAIN
+- **Сервер SSL**: $SERVER_DOMAIN
 - **Порт Node.js**: $NODE_PORT
 - **Протокол цели**: $TARGET_PROTOCOL
 - **Лимит памяти**: $MAX_MEMORY
@@ -897,7 +912,7 @@ echo
 echo -e "${YELLOW}📋 Информация о развертывании:${NC}"
 echo "   • Домен прокси:    https://$PROXY_DOMAIN"
 echo "   • Целевой домен:   $TARGET_PROTOCOL://$TARGET_DOMAIN"
-echo "   • Сервер прокси:   https://$SERVER_DOMAIN"
+echo "   • Сервер SSL:      https://$SERVER_DOMAIN"
 echo "   • Проект:          $PROJECT_NAME"
 echo "   • Директория:      $PROJECT_DIR"
 echo "   • Стабильность:    Повышенная совместимость включена"
@@ -925,7 +940,7 @@ echo "   • Оптимизированная nginx конфигурация"
 echo
 echo -e "${GREEN}✅ Все сервисы запущены и готовы к работе!${NC}"
 echo
-echo -e "${CYAN}Для тестирования откройте в браузере: https://$SERVER_DOMAIN${NC}"
+echo -e "${CYAN}Для тестирования откройте в браузере: https://$SERVER_DOMAIN${NC} и https://$PROXY_DOMAIN${NC}"
 echo
 
 log_success "Minimal Universal Reverse Proxy успешно установлен и настроен!" 
