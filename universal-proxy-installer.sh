@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Universal Reverse Proxy Installer - МИНИМАЛЬНАЯ СТАБИЛЬНАЯ ВЕРСИЯ
+# Universal Reverse Proxy Installer - ВЕРСИЯ С БАЛАНСИРОВЩИКОМ
 # Автоматическое развертывание Node.js reverse proxy с HTTPS
 # Версия: 1.5
 # Автор: Savvvit
@@ -57,16 +57,16 @@ check_status() {
 # Заголовок
 echo -e "${CYAN}"
 echo "╔═══════════════════════════════════════════════════════════════╗"
-echo "║              UNIVERSAL REVERSE PROXY INSTALLER               ║"
-echo "║                  Minimal Stability Edition                   ║"
+echo "║              UNIVERSAL REVERSE PROXY INSTALLER                ║"
+echo "║                      Balancer Edition                         ║"
 echo "║                                                               ║"
-echo "║  Автоматическое развертывание Node.js reverse proxy с HTTPS  ║"
-echo "║  • SSL сертификаты Let's Encrypt                             ║"
-echo "║  • nginx SSL termination                                     ║"
+echo "║  Автоматическое развертывание Node.js reverse proxy с HTTPS   ║"
+echo "║  • SSL сертификаты Let's Encrypt                              ║"
+echo "║  • nginx SSL termination                                      ║"
 echo "║  • PM2 process management                                     ║"
-echo "║  • URL rewriting для HTML/CSS/JS                            ║"
-echo "║  • Минимальная архитектура для максимальной стабильности    ║"
-echo "║  • Прямая обработка заголовков без middleware               ║"
+echo "║  • URL rewriting для HTML/CSS/JS                              ║"
+echo "║  • Минимальная архитектура для максимальной стабильности      ║"
+echo "║  • Прямая обработка заголовков без middleware                 ║"
 echo "╚═══════════════════════════════════════════════════════════════╝"
 echo -e "${NC}"
 
@@ -904,7 +904,7 @@ fi
 # 23. Финальный отчет
 echo
 echo -e "${GREEN}╔═══════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${GREEN}║                    УСТАНОВКА ЗАВЕРШЕНА!                      ║${NC}"
+echo -e "${GREEN}║                    УСТАНОВКА ЗАВЕРШЕНА!                       ║${NC}"
 echo -e "${GREEN}╚═══════════════════════════════════════════════════════════════╝${NC}"
 echo
 echo -e "${BLUE}🎉 Minimal Universal Reverse Proxy успешно развернут!${NC}"
