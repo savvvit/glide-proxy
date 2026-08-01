@@ -7,6 +7,7 @@
 - Owner:
 - Repository branch:
 - Pull Request:
+- Independent reviewer: Claude, separate review session
 - Baseline commit:
 - Start date:
 - Completion date:

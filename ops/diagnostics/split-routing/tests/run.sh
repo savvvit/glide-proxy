@@ -13,6 +13,8 @@ bash -n "${PACKAGE_DIR}/server/common.sh"
 bash -n "${PACKAGE_DIR}/server/preflight.sh"
 bash -n "${PACKAGE_DIR}/server/deploy.sh"
 bash -n "${PACKAGE_DIR}/server/teardown.sh"
+bash -n "${PACKAGE_DIR}/client/GCM-Routing-Test.command.template"
+bash -n "${PACKAGE_DIR}/client/prepare-client-bundle.sh"
 sh -n "${PACKAGE_DIR}/client/collect-routing-diagnostic.sh"
 sh -n "${PACKAGE_DIR}/client/analyze-routing-results.sh"
 
@@ -29,6 +31,16 @@ ENDPOINT_TOKEN='test-token-123456' \
 grep -q 'server_name diag.systemcoach.ru;' "${tmp_dir}/render/site.conf"
 grep -q 'server_name diag.glide.club;' "${tmp_dir}/render/site.conf"
 grep -q 'location = /routing-test-test-token-123456' "${tmp_dir}/render/endpoint.conf"
+
+mkdir "${tmp_dir}/bundle-output"
+ENDPOINT_TOKEN='test-token-123456' \
+    "${PACKAGE_DIR}/client/prepare-client-bundle.sh" \
+    --output-dir "${tmp_dir}/bundle-output" >/dev/null
+[[ -f "${tmp_dir}/bundle-output/GCM-Routing-Test.zip" ]]
+[[ -x "${tmp_dir}/bundle-output/GCM-Routing-Test/GCM Routing Test.command" ]]
+! grep -R '@@' "${tmp_dir}/bundle-output/GCM-Routing-Test"
+grep -q "ENDPOINT_TOKEN='test-token-123456'" \
+    "${tmp_dir}/bundle-output/GCM-Routing-Test/GCM Routing Test.command"
 
 write_fixture() {
     local file="$1"
@@ -64,6 +76,7 @@ set -o errexit
 grep -q 'RESULT: REFUTED' <<<"$refuted_output"
 
 "${PACKAGE_DIR}/client/collect-routing-diagnostic.sh" --help >/dev/null
+"${PACKAGE_DIR}/client/prepare-client-bundle.sh" --help >/dev/null
 "${PACKAGE_DIR}/server/preflight.sh" --help >/dev/null
 "${PACKAGE_DIR}/server/deploy.sh" --help >/dev/null
 "${PACKAGE_DIR}/server/teardown.sh" --help >/dev/null

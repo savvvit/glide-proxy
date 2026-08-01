@@ -38,8 +38,10 @@ split-routing/
 │   └── teardown.sh
 ├── client/
 │   ├── CLIENT-INSTRUCTIONS.md
+│   ├── GCM-Routing-Test.command.template
 │   ├── collect-routing-diagnostic.sh
-│   └── analyze-routing-results.sh
+│   ├── analyze-routing-results.sh
+│   └── prepare-client-bundle.sh
 └── tests/run.sh
 ```
 
@@ -102,7 +104,7 @@ export ENDPOINT_TOKEN='<случайная строка 12–64 символа>'
 
 6. Выполнить прямой smoke-test, затем вручную создать обе A-записи по DNS-инструкции.
 
-7. На своём устройстве сначала собрать `vpn-off`, затем `vpn-on`:
+7. На своём устройстве сначала проверить технические скрипты напрямую: собрать `vpn-off`, затем `vpn-on`:
 
    ```bash
    sh client/collect-routing-diagnostic.sh \
@@ -114,9 +116,20 @@ export ENDPOINT_TOKEN='<случайная строка 12–64 символа>'
      --token "$ENDPOINT_TOKEN" --scenario vpn-on
    ```
 
-   Для передачи внешнему участнику использовать короткую [клиентскую инструкцию](client/CLIENT-INSTRUCTIONS.md), указав согласованный token и VPN-сценарий.
+8. После успешной собственной проверки подготовить тот же нетехнический пакет, который позже может получить клиент:
 
-8. Сравнить результаты:
+   ```bash
+   GCM_BUNDLE_DIR="$HOME/Downloads/gcm-client-bundle"
+   mkdir -p "$GCM_BUNDLE_DIR"
+   ENDPOINT_TOKEN="$ENDPOINT_TOKEN" \
+     ./client/prepare-client-bundle.sh --output-dir "$GCM_BUNDLE_DIR"
+   ```
+
+   Результат — ZIP для отправки через Telegram. Внутри находится один видимый файл `GCM Routing Test.command`: он последовательно попросит выключить и включить VPN, соберёт оба результата, выполнит локальный анализ и покажет готовый ZIP для отправки владельцу.
+
+9. Владелец сначала проходит [клиентскую инструкцию](client/CLIENT-INSTRUCTIONS.md) на собственном Mac ровно как будущий участник. Только после фактической репетиции инструкция корректируется и может быть отправлена клиенту.
+
+10. При необходимости сравнить отдельные технические результаты вручную:
 
    ```bash
    sh client/analyze-routing-results.sh \
@@ -126,7 +139,7 @@ export ENDPOINT_TOKEN='<случайная строка 12–64 символа>'
 
    Если shell раскрыл больше одного файла на сценарий, передать точные имена файлов.
 
-9. Сохранить только минимальный evidence-набор и выполнить teardown по `CHANGE-PLAN.md`.
+11. Сохранить только минимальный evidence-набор и выполнить teardown по `CHANGE-PLAN.md`.
 
 ## Почему нужен клиентский файл
 
@@ -139,6 +152,8 @@ export ENDPOINT_TOKEN='<случайная строка 12–64 символа>'
 - связывает результат с Nginx-логом по `request_id`.
 
 Файл небольшой. Он содержит публичный IP устройства/VPN, поэтому перед передачей клиенту нужно сообщить о составе данных и удалить результат после анализа согласно согласованному retention.
+
+Retention — это максимальный срок, в течение которого диагностические TSV/ZIP и серверный лог сохраняются для проверки. Ничего не удалится автоматически через 7 дней. Владелец вручную удаляет копии из рабочей папки, Telegram и сервера сразу после принятия вывода, но не позднее 7 дней, если отдельно не согласован другой срок. Сертификат к diagnostic evidence не относится и может оставаться неиспользуемым до отдельного cleanup.
 
 ## Мини-пилот AI-assisted разработки
 
@@ -158,7 +173,7 @@ export ENDPOINT_TOKEN='<случайная строка 12–64 символа>'
 
 - владелец: принимает scope, production go/no-go, выполняет DNS и ручной rollout;
 - Codex: готовит repo-only артефакты, тесты и анализ результатов;
-- independent reviewer: проверяет готовый PR до merge, если назначен владельцем;
+- independent reviewer: Claude в отдельной review-сессии проверяет готовый Draft PR до merge; reviewer не редактирует ветку;
 - merge и production deployment остаются разными gates.
 
 ## Источники

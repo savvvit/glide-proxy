@@ -1,0 +1,86 @@
+#!/bin/bash
+
+set -u
+umask 077
+
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+SUPPORT_DIR="${SCRIPT_DIR}/support"
+RU_HOST='@@RU_HOST@@'
+NON_RU_HOST='@@NON_RU_HOST@@'
+ENDPOINT_TOKEN='@@ENDPOINT_TOKEN@@'
+RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)"
+RESULT_DIR="${SCRIPT_DIR}/results-${RUN_ID}"
+RESULT_ZIP="${SCRIPT_DIR}/GCM-routing-results-${RUN_ID}.zip"
+
+pause_before_exit() {
+    printf '\nНажмите Enter, чтобы закрыть окно.\n'
+    read -r _
+}
+
+fail() {
+    printf '\nОШИБКА: %s\n' "$*" >&2
+    printf 'Сделайте снимок этого окна и отправьте владельцу теста.\n' >&2
+    pause_before_exit
+    exit 1
+}
+
+run_scenario() {
+    local scenario="$1"
+    local output="$2"
+
+    sh "${SUPPORT_DIR}/collect-routing-diagnostic.sh" \
+        --ru-host "$RU_HOST" \
+        --non-ru-host "$NON_RU_HOST" \
+        --token "$ENDPOINT_TOKEN" \
+        --scenario "$scenario" \
+        --output "$output" || fail "не удалось выполнить сценарий ${scenario}"
+}
+
+clear
+printf 'GCM — проверка маршрута VPN\n'
+printf '===========================\n\n'
+printf 'Тест выполнит две короткие серии HTTPS-запросов.\n'
+printf 'Он не меняет настройки Mac или VPN.\n\n'
+
+mkdir -m 0700 "$RESULT_DIR" || fail 'не удалось создать папку результатов'
+
+printf 'ШАГ 1 ИЗ 2\n'
+printf 'Полностью выключите VPN.\n'
+printf 'Когда VPN будет выключен, нажмите Enter.\n'
+read -r _
+run_scenario 'vpn-off' "${RESULT_DIR}/vpn-off.tsv"
+
+printf '\nПервая часть завершена.\n\n'
+printf 'ШАГ 2 ИЗ 2\n'
+printf 'Включите согласованный VPN-профиль и дождитесь статуса «Подключено».\n'
+printf 'Затем нажмите Enter.\n'
+read -r _
+run_scenario 'vpn-on' "${RESULT_DIR}/vpn-on.tsv"
+
+set +e
+sh "${SUPPORT_DIR}/analyze-routing-results.sh" \
+    --vpn-off "${RESULT_DIR}/vpn-off.tsv" \
+    --vpn-on "${RESULT_DIR}/vpn-on.tsv" \
+    >"${RESULT_DIR}/summary.txt" 2>&1
+analysis_status=$?
+set -e
+printf 'analyzer_exit=%s\n' "$analysis_status" >>"${RESULT_DIR}/summary.txt"
+
+if command -v ditto >/dev/null 2>&1; then
+    ditto -c -k --sequesterRsrc --keepParent "$RESULT_DIR" "$RESULT_ZIP" || \
+        fail 'не удалось упаковать результаты'
+elif command -v zip >/dev/null 2>&1; then
+    (cd "$SCRIPT_DIR" && zip -qr "$RESULT_ZIP" "$(basename "$RESULT_DIR")") || \
+        fail 'не удалось упаковать результаты'
+else
+    fail 'на Mac не найдена системная команда упаковки ZIP'
+fi
+
+printf '\nДиагностика завершена.\n'
+printf 'Отправьте владельцу через Telegram файл:\n%s\n' "$RESULT_ZIP"
+
+if command -v open >/dev/null 2>&1; then
+    open -R "$RESULT_ZIP" >/dev/null 2>&1 || true
+fi
+
+pause_before_exit

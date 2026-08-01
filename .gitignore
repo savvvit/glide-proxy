@@ -1,0 +1,5 @@
+.DS_Store
+GCM-Routing-Test.zip
+GCM-routing-results-*.zip
+routing-diagnostic-*.tsv
+results-*/
