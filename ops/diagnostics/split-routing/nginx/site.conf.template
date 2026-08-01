@@ -1,0 +1,57 @@
+# Managed by GCM one-time split-routing diagnostic.
+# Do not edit on production. Re-render from the reviewed repository artifact.
+
+log_format gcm_routing_ab escape=json
+    '{"timestamp":"$time_iso8601","request_id":"$request_id","host":"$host","client_ip":"$remote_addr"}';
+
+server {
+    listen 80;
+    server_name @@RU_HOST@@ @@NON_RU_HOST@@;
+
+    access_log off;
+    server_tokens off;
+
+    location = /routing-test-@@ENDPOINT_TOKEN@@ {
+        return 308 https://$host$request_uri;
+    }
+
+    location / {
+        return 404;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name @@RU_HOST@@;
+
+    ssl_certificate /etc/letsencrypt/live/@@RU_CERT_LINEAGE@@/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/@@RU_CERT_LINEAGE@@/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    access_log off;
+    server_tokens off;
+
+    include /etc/nginx/snippets/gcm-routing-ab-endpoint.conf;
+
+    location / {
+        return 404;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name @@NON_RU_HOST@@;
+
+    ssl_certificate /etc/letsencrypt/live/@@NON_RU_CERT_LINEAGE@@/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/@@NON_RU_CERT_LINEAGE@@/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    access_log off;
+    server_tokens off;
+
+    include /etc/nginx/snippets/gcm-routing-ab-endpoint.conf;
+
+    location / {
+        return 404;
+    }
+}

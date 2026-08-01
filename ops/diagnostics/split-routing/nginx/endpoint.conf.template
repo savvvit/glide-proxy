@@ -1,0 +1,11 @@
+# Shared endpoint for both diagnostic hostnames.
+location = /routing-test-@@ENDPOINT_TOKEN@@ {
+    default_type application/json;
+    add_header Cache-Control "no-store, max-age=0" always;
+    add_header Pragma "no-cache" always;
+    add_header X-Request-ID "$request_id" always;
+
+    access_log /var/log/nginx/gcm-routing-ab-test.log gcm_routing_ab;
+
+    return 200 '{"host":"$host","client_ip":"$remote_addr","request_id":"$request_id","timestamp":"$time_iso8601"}';
+}
